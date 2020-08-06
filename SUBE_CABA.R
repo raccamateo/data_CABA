@@ -1,5 +1,4 @@
 library(tidyverse)
-library(ggmap)
 library(lubridate)
 #vamos a cargar la libreria gganimate para animar gráficos que vamos a hacer con ggplot
 library(gganimate)
@@ -7,9 +6,6 @@ library(gganimate)
 library(transformr)
 library(viridis)
 library(hrbrthemes)
-#llamamos a las librerías que vamos a usar para trabajar con datos geoespaciales
-library(sf)
-library(tidyverse)
 
 options(scipen = 999)
 
