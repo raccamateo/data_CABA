@@ -1,0 +1,253 @@
+---
+title: "SUBE_CABA"
+author: "Mateo W. Racca"
+date: "8/6/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Transporte público en CABA -> visualizaciones con gganimate
+
+Hace unos días vi en Twitter que el gobierno de la Ciudad de Buenos Aires empezó a actualizar diariamente los datos relacionados con la pandemia (SUBE, casos, flujo vehicular, etc).
+
+Desde ese momento vi varios plots sobre información de distintos datasets, y me llamó la atención que todas las visualizaciones (que vi) sean estáticas. Entonces se me ocurrió descargar uno de los datasets y ver con qué datos me encontraba.
+
+Este post es una exploración, por lo que agradecería comentarios, sugerencias y preguntas si es que surgen. Voy tomar bloques de mi script de R y a intentar explicar qué hice, por qué y para qué.
+
+Antes de empezar, cargué las siguientes librerías:
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(tidyverse)
+library(lubridate)
+#vamos a cargar la libreria gganimate para animar gráficos que vamos a hacer con ggplot
+library(gganimate)
+library(transformr)
+library(viridis)
+library(hrbrthemes)
+library(magrittr)
+library(knitr)
+library(dplyr)
+```
+
+El dataset que voy a usar, es el de la SUBE. Para descargarlo, y que cada vez que el scrip corra tome los últimos datos disponibles busqué a través de CKAN usando el paquete de R los links de acceso para cada dataset relacionado con el coronavirus.
+[Pueden ver la lista acá.] (https://docs.google.com/spreadsheets/d/1YrT_VTi_bE-iDbDjLeZ1PfNzV0kEhAPyHxypb_oxynE/edit#gid=0)
+
+Vamos a descargar el dataset:
+
+
+```{r echo=TRUE}
+sube <- read.csv('https://cdn.buenosaires.gob.ar/datosabiertos/datasets/transporte/sube/dataset_viajes_sube.csv')
+```
+
+Como yo no quiero usar notación científica (entiendo que los gráficos quedan mejor sin ella):
+
+```{r}
+options(scipen = 999)
+```
+
+Para ver qué datos hay en el dataset y su tipo:
+```{r}
+head(sube)
+
+#los datos que tenemos son: tipo de transporte, el día, la variable parcial y la cantidad de pasajerxs
+
+str(sube)
+```
+
+*Las fechas* (variable DIA) *están como factor*. Vamos a modificar eso para poder trabajar después. Para eso usamos el paquete **lubridate** y transformamos el formato de las fechas a *día-mes-año-horas:minutos:segundos*
+
+```{r}
+sube <- sube %>% mutate (DIA = dmy_hms(DIA))
+```
+
+Vamos a cambiar los nombres para que la variable DIA se llame FECHA
+
+```{r}
+sube$FECHA <- sube$DIA
+```
+
+*Tomamos las fechas (FECHA) y creamos una nueva variable*. Es algo confuso, lo sé, pero a la nueva variable vamos a llamarla *DIA*. A DIA le asignamos un número según a qué día de la semana corresponde cada una de las fechas. Para eso usamos la función wday()
+
+```{r}
+sube$DIA <- wday(sube$FECHA)
+```
+
+Ahora vamos a usar case_when para transformar los números en días
+
+```{r}
+sube$DIA <- (sube$DIA = case_when(sube$DIA == 2 ~ "LUNES",
+                                  sube$DIA == 3 ~ "MARTES",
+                                  sube$DIA == 4 ~ "MIÉRCOLES",
+                                  sube$DIA == 5 ~ "JUEVES",
+                                  sube$DIA == 6 ~ "VIERNES",
+                                  sube$DIA == 7 ~ "SÁBADO",
+                                  sube$DIA == 1 ~ "DOMINGO")) 
+```
+
+Ahora, *creamos una columna llamada SEMANA*, que va a tener la información sobre a qué semana corresponde cada una de nuestras fechas.
+
+```{r}
+sube$SEMANA <- week(sube$FECHA)
+```
+
+Extraemos el número del mes al que corresponde cada fecha
+
+```{r}
+sube$N_MES <- month(sube$FECHA)
+```
+
+Asignamos a cada número de mes el mes correspondiente
+
+```{r}
+sube$N_MES <- (sube$N_MES = case_when(sube$N_MES == 1 ~ "ENERO",
+                                      sube$N_MES == 2 ~ "FEBRERO",
+                                      sube$N_MES == 3 ~ "MARZO",
+                                      sube$N_MES == 4 ~ "ABRIL",
+                                      sube$N_MES == 5 ~ "MAYO",
+                                      sube$N_MES == 6 ~ "JUNIO",
+                                      sube$N_MES == 7 ~ "JULIO",
+                                      sube$N_MES == 8 ~ "AGOSTO",
+                                      sube$N_MES == 9 ~ "SEPTIEMBRE",
+                                      sube$N_MES == 10 ~ "OCTUBRE",
+                                      sube$N_MES == 11 ~ "NOVIEMBRE",
+                                      sube$N_MES == 12 ~ "DICIEMBRE"))
+```
+
+**¿Por qué hice esto con todos los meses si no había pandemia en enero?** 
+Porque el dataset se actualiza constantemente, y como no sabemos cuando va a terminar esto, me parece útil que en el script quede la función para todos los meses del año.
+
+Extraemos a qué día del mes corresponde cada fecha
+
+```{r}
+sube$N_DIA <- day(sube$FECHA)
+```
+
+Como no vamos a usar la fila PARCIAL, vamos a dejarla fuera del dataset
+
+```{r}
+sube <- select(sube, -PARCIAL)
+```
+
+Ahora vamos a filtrar por tipo de transporte y a crear datasets con cada uno de ellos y ver cómo quedan.
+
+```{r}
+sube_subte <- filter(sube, TIPO_TRANSPORTE == "Subte")
+head(sube_subte, n=10)
+```
+
+```{r}
+sube_colectivo <- filter(sube, TIPO_TRANSPORTE == "Colectivo")
+head(sube_colectivo, n=10)
+```
+
+```{r}
+sube_tren <- filter(sube, TIPO_TRANSPORTE == "Tren")
+head(sube_tren, n=10)
+```
+
+Recuerden que si quieren guardar cada dataset nuevo, pueden usar *write_csv*
+
+##**Ahora que tenemos toda la data "acomodada", vamos a los gráficos.**
+ 
+[gganimate] (https://gganimate.com/index.html) *extiende la gramática de ggplot2 e incluye la descripción de la animación.*
+ 
+En estos casos vamos a usar  **transition _ * ()** que define cómo se distribuyen los datos y cómo se relacionan a lo largo del tiempo.
+
+Vamos a hacer un gráfico animado de barras sobre el uso de transporte público durante la pandemia por semana (y días)
+
+```{r}
+ggplot(data = sube, aes(x = factor(DIA, levels=c("LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO", "DOMINGO")), y = CANTIDAD)) +
+  geom_bar(stat='identity', aes(fill = TIPO_TRANSPORTE)) +
+  transition_time(SEMANA) + #esta es la clave
+  labs(title = "Uso de transporte público durante la pandemia
+       semana: {as.integer(frame_time)}",
+       subtitle = "Ciudad Autónoma de Buenos Aires",
+       x = "Día",
+       y = "Usuarixs",
+       caption = "fuente: data.buenosaires.gob.ar")+
+  scale_fill_viridis_d() +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+anim_save("uso_tp.gif")
+```
+
+Ahora vamos con un gráfico de líneas animado con la cantidad de usuarixs de cada tipo de transporte durante la pandemia
+
+```{r}
+ggplot(sube, aes(x = FECHA, y = CANTIDAD, color = TIPO_TRANSPORTE)) +
+  geom_line() +
+  geom_point(aes(group = seq_along(FECHA))) +
+  labs(title = "Uso de transporte público durante la pandemia",
+       subtitle = "Ciudad Autónoma de Buenos Aires",
+       x = "",
+       y = "Usuarixs",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  scale_color_viridis(discrete=TRUE) +
+  transition_reveal(FECHA) + #en vez de transition_time
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+anim_save("sube_lin.gif")
+```
+
+Si tomamos cada tipo de transporte y hacemos gráficos de líneas animados: 
+
+Uso de colectivos por día y coloreado por mes durante la pandemia
+
+```{r}
+ggplot(sube_colectivo, aes(x = N_DIA, y = CANTIDAD, color = N_MES)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Uso de colectivos durante la pandemia",
+       subtitle = "Ciudad Autónoma de Buenos Aires",
+       x = "",
+       y = "Usuarixs",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  scale_color_viridis(discrete=TRUE) +
+  transition_reveal(FECHA) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+anim_save("sube_colectivos_lin.gif")
+```
+
+Gráfico de líneas animado: uso de subtes por día y coloreado por mes durante la pandemia
+
+```{r}
+ggplot(sube_subte, aes(x = N_DIA, y = CANTIDAD, color = N_MES)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Uso de subtes durante la pandemia",
+       subtitle = "Ciudad Autónoma de Buenos Aires",
+       x = "",
+       y = "Usuarixs",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  scale_color_viridis(discrete=TRUE) +
+  transition_reveal(FECHA) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+anim_save("sube_subte_lin.gif")
+```
+
+Gráfico de líneas animado: uso de trenes por día y coloreado por mes durante la pandemia
+
+```{r}
+ggplot(sube_tren, aes(x = N_DIA, y = CANTIDAD, color = N_MES)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Uso de trenes durante la pandemia",
+       subtitle = "Ciudad Autónoma de Buenos Aires",
+       x = "",
+       y = "Usuarixs",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  scale_color_viridis(discrete=TRUE) +
+  transition_reveal(FECHA) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+anim_save("sube_tren_lin.gif")
+```
+
+Gracias por llegar hasta acá. Espero te haya servido. Cualquier cosa, me podés escribir por twitter a @usernamemateo o por mail a mateoracca@gmail.com
