@@ -42,7 +42,3 @@ ggplot(flujo_vehicular, aes(x = FECHA_HORA, y = CANTIDAD, color = SENTIDO)) +
   theme(legend.position = "bottom")
 
 anim_save("flujo_vehicular.gif")
-
-
-ggplot(data = flujo_vehicular) +
-  geom_point(aes(x= LONG, y= LAT))
