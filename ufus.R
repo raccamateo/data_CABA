@@ -3,22 +3,10 @@ library(viridis)
 library(hrbrthemes)
 #llamamos a las librerías que vamos a usar para trabajar con datos geoespaciales
 library(sf)
-library(tidyverse)
-
 
 
 #datos Unodades Febriles de Emergencia (UFUS)
 ufus <- read_csv('http://cdn.buenosaires.gob.ar/datosabiertos/datasets/salud/ufus/ubicacion-ufus.csv')
-
-
-bbox <- getbb("Ciudad de Buenos Aires", format_out = "sf_polygon")
-bbox
-
-
-leaflet(bbox) %>%
-  addTiles() %>%
-  addPolygons()
-
 
 
 #vamos a descargar un archivo .geojson con la info sobre las comunas en CABA
