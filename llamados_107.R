@@ -31,4 +31,37 @@ llamados_107$DIA <- wday(llamados_107$FECHA)
 llamados_107$SEMANA <- week(llamados_107$FECHA)
 
 
+#ahora transformamos los números en días, para eso:
+llamados_107$DIA <- (llamados_107$DIA = case_when(llamados_107$DIA == 2 ~ "LUNES",
+                                                  llamados_107$DIA == 3 ~ "MARTES",
+                                                  llamados_107$DIA == 4 ~ "MIÉRCOLES",
+                                                  llamados_107$DIA == 5 ~ "JUEVES",
+                                                  llamados_107$DIA == 6 ~ "VIERNES",
+                                                  llamados_107$DIA == 7 ~ "SÁBADO",
+                                                  llamados_107$DIA == 1 ~ "DOMINGO"))
+
+#extraemos el número del mes al que corresponde cada fecha
+llamados_107$N_MES <- month(llamados_107$FECHA)
+
+#asignamos a cada número de mes el mes correspondiente
+llamados_107$N_MES <- (llamados_107$N_MES = case_when(llamados_107$N_MES == 3 ~ "MARZO",
+                                                      llamados_107$N_MES == 4 ~ "ABRIL",
+                                                      llamados_107$N_MES == 5 ~ "MAYO",
+                                                      llamados_107$N_MES == 6 ~ "JUNIO",
+                                                      llamados_107$N_MES == 7 ~ "JULIO",
+                                                      llamados_107$N_MES == 8 ~ "AGOSTO",
+                                                      llamados_107$N_MES == 9 ~ "SEPTIEMBRE",
+                                                      llamados_107$N_MES == 10 ~ "OCTUBRE",
+                                                      llamados_107$N_MES == 11 ~ "NOVIEMBRE",
+                                                      llamados_107$N_MES == 12 ~ "DICIEMBRE"))
+
+#extraemos a qué día del mes corresponde cada fecha
+llamados_107$N_DIA <- day(llamados_107$FECHA)
+
+#vamos a ver cómo quedo lo que hicimos
+head(llamados_107, n=10)
+
+#renombramos la siguiente columna:
+llamados_107 %>%
+  rename(LLAMADOS = COVID_LLAMADOS)
 
