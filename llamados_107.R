@@ -78,5 +78,5 @@ ggplot(data = llamados_107, aes(x = factor(DIA, levels=c("LUNES", "MARTES", "MIÃ
   scale_fill_viridis_d() +
   theme_minimal()
 
-
+anim_save("llamados_semana_dia.gif")
 
