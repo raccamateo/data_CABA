@@ -35,7 +35,8 @@ ggplot(flujo_vehicular, aes(x = FECHA_HORA, y = CANTIDAD, color = SENTIDO)) +
   labs(title = "Flujo vehicular",
        subtitle = "Ciudad Autónoma de Buenos Aires",
        x = "",
-       y = "Vehículos") +
+       y = "Vehículos",
+       caption = "fuente: data.buenosaires.gob.ar") +
   scale_color_viridis(discrete=TRUE) +
   theme_minimal() +
   theme(legend.position = "bottom")
@@ -71,7 +72,8 @@ ggplot() +
   labs(title = "Flujo vehicular en CABA",
        subtitle = "Semana {as.integer(frame_time)}",
        x = "",
-       y = "") +
+       y = "",
+       caption = "fuente: data.buenosaires.gob.ar") +
   theme_minimal()
 
 #guardamos la animación
