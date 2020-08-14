@@ -21,6 +21,7 @@ ggplot() +
   geom_point(data = ufus, aes(x = long, y = lat, color = nombre), show.legend = FALSE) +
   geom_label_repel(data = ufus, aes(long, lat, label = nombre), size = 2) +
   labs(title = "Unidades Febriles de Emergencia",
-       subtitle = "CABA") +
+       subtitle = "CABA",
+       caption = "fuente: data.buenosaires.gob.ar") +
   scale_color_viridis(discrete=TRUE) +
   theme_minimal()
