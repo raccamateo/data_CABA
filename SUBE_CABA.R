@@ -97,7 +97,8 @@ ggplot(sube, aes(x = FECHA, y = CANTIDAD, color = TIPO_TRANSPORTE)) +
   labs(title = "Uso de transporte público durante la pandemia",
        subtitle = "Ciudad Autónoma de Buenos Aires",
        x = "",
-       y = "Usuarixs") +
+       y = "Usuarixs",
+       caption = "fuente: data.buenosaires.gob.ar") +
   scale_color_viridis(discrete=TRUE) +
   transition_reveal(FECHA) +
   theme_minimal() +
@@ -114,7 +115,8 @@ ggplot(sube_colectivo, aes(x = N_DIA, y = CANTIDAD, color = N_MES)) +
   labs(title = "Uso de colectivos durante la pandemia",
        subtitle = "Ciudad Autónoma de Buenos Aires",
        x = "",
-       y = "Usuarixs") +
+       y = "Usuarixs",
+       caption = "fuente: data.buenosaires.gob.ar") +
   scale_color_viridis(discrete=TRUE) +
   transition_reveal(FECHA) +
   theme_minimal() +
@@ -128,7 +130,8 @@ ggplot(sube_subte, aes(x = N_DIA, y = CANTIDAD, color = N_MES)) +
   labs(title = "Uso de subtes durante la pandemia",
        subtitle = "Ciudad Autónoma de Buenos Aires",
        x = "",
-       y = "Usuarixs") +
+       y = "Usuarixs",
+       caption = "fuente: data.buenosaires.gob.ar") +
   scale_color_viridis(discrete=TRUE) +
   transition_reveal(FECHA) +
   theme_minimal() +
@@ -143,7 +146,8 @@ ggplot(sube_tren, aes(x = N_DIA, y = CANTIDAD, color = N_MES)) +
   labs(title = "Uso de trenes durante la pandemia",
        subtitle = "Ciudad Autónoma de Buenos Aires",
        x = "",
-       y = "Usuarixs") +
+       y = "Usuarixs",
+       caption = "fuente: data.buenosaires.gob.ar") +
   scale_color_viridis(discrete=TRUE) +
   transition_reveal(FECHA) +
   theme_minimal() +
