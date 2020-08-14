@@ -74,4 +74,5 @@ ggplot() +
        y = "") +
   theme_minimal()
 
+#guardamos la animación
 anim_save("flujo_vehicular_mapa_semana.gif")
