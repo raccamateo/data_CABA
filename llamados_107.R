@@ -65,3 +65,18 @@ head(llamados_107, n=10)
 llamados_107 %>%
   rename(LLAMADOS = COVID_LLAMADOS)
 
+
+llamados_107 <- llamados_107 %>% filter(SEMANA > 11)
+
+ggplot(data = llamados_107, aes(x = factor(DIA, levels=c("LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO", "DOMINGO")), y = COVID_LLAMADOS)) +
+  geom_bar(stat='identity', aes(fill = DIA)) +
+  transition_time(SEMANA) +
+  labs(title = "Llamados al 107 en CABA",
+       subtitle = "semana: {as.integer(frame_time)}",
+       x = "Día",
+       y = "Llamados")+
+  scale_fill_viridis_d() +
+  theme_minimal()
+
+
+
