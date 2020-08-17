@@ -81,3 +81,21 @@ ggplot(data = llamados_107, aes(x = factor(DIA, levels=c("LUNES", "MARTES", "MI�
 
 anim_save("llamados_semana_dia.gif")
 
+
+
+
+
+#gráfico de líneas animado con la cantidad de usuarixs de cada tipo de transporte durante la pandemia
+ggplot(sube, aes(x = FECHA, y = CANTIDAD, color = TIPO_TRANSPORTE)) +
+  geom_line() +
+  geom_point(aes(group = seq_along(FECHA))) +
+  labs(title = "Uso de transporte público durante la pandemia",
+       subtitle = "Ciudad Autónoma de Buenos Aires",
+       x = "",
+       y = "Usuarixs") +
+  scale_color_viridis(discrete=TRUE) +
+  transition_reveal(FECHA) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+anim_save("sube_lin.gif")
