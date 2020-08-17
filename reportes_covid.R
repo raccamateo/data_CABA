@@ -40,3 +40,19 @@ ggplot(reporte_covid, aes(x = FECHA, y = VALOR, color = TIPO_DATO)) +
   transition_reveal(FECHA) +
   theme_minimal() +
   theme(legend.position = "bottom")
+
+
+reporte_covid_camas <- filter(reporte_covid, TIPO_DATO == "ocupacion_de_camas_sistema_publico" | TIPO_DATO == "total_de_camas_sistema_publico")
+
+#gráfico de líneas animado con la cantidad de usuarixs de cada tipo de transporte durante la pandemia
+ggplot(reporte_covid_camas, aes(x = FECHA, y = VALOR, color = TIPO_DATO)) +
+  geom_line() +
+  geom_point(aes(group = seq_along(FECHA))) +
+  labs(title = "Reportes diarios",
+       subtitle = "Covid-19",
+       x = "",
+       y = "N") +
+  scale_color_viridis(discrete=TRUE) +
+  transition_reveal(FECHA) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
