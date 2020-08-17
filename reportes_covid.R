@@ -26,3 +26,17 @@ reporte_covid <- select(reporte_covid, -FECHA_PROCESO, - ID_CARGA)
 #cambiamos el formato de la fecha para poder trabajar como serie temporal
 reporte_covid <- reporte_covid %>% 
   mutate(FECHA = dmy_hms(FECHA))
+
+
+#gráfico de líneas animado con la cantidad de usuarixs de cada tipo de transporte durante la pandemia
+ggplot(reporte_covid, aes(x = FECHA, y = VALOR, color = TIPO_DATO)) +
+  geom_line() +
+  geom_point(aes(group = seq_along(FECHA))) +
+  labs(title = "Reportes diarios",
+       subtitle = "Covid-19",
+       x = "",
+       y = "N") +
+  scale_color_viridis(discrete=TRUE) +
+  transition_reveal(FECHA) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
