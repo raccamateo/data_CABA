@@ -21,3 +21,8 @@ head(reporte_covid)
 
 #como FECHA_PROCESO e ID_CARGA no nos interesan, seleccionamos el resto de las variables
 reporte_covid <- select(reporte_covid, -FECHA_PROCESO, - ID_CARGA)
+
+
+#cambiamos el formato de la fecha para poder trabajar como serie temporal
+reporte_covid <- reporte_covid %>% 
+  mutate(FECHA = dmy_hms(FECHA))
