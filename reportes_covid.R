@@ -28,7 +28,7 @@ reporte_covid <- reporte_covid %>%
   mutate(FECHA = dmy_hms(FECHA))
 
 
-#gráfico de líneas animado con la cantidad de usuarixs de cada tipo de transporte durante la pandemia
+#gráfico de líneas animado 
 ggplot(reporte_covid, aes(x = FECHA, y = VALOR, color = TIPO_DATO)) +
   geom_line() +
   geom_point(aes(group = seq_along(FECHA))) +
@@ -44,7 +44,7 @@ ggplot(reporte_covid, aes(x = FECHA, y = VALOR, color = TIPO_DATO)) +
 
 reporte_covid_camas <- filter(reporte_covid, TIPO_DATO == "ocupacion_de_camas_sistema_publico" | TIPO_DATO == "total_de_camas_sistema_publico")
 
-#gráfico de líneas animado con la cantidad de usuarixs de cada tipo de transporte durante la pandemia
+#gráfico de líneas animado con la cantidad de camas en CABA
 ggplot(reporte_covid_camas, aes(x = FECHA, y = VALOR, color = TIPO_DATO)) +
   geom_line() +
   geom_point(aes(group = seq_along(FECHA))) +
@@ -56,3 +56,5 @@ ggplot(reporte_covid_camas, aes(x = FECHA, y = VALOR, color = TIPO_DATO)) +
   transition_reveal(FECHA) +
   theme_minimal() +
   theme(legend.position = "bottom")
+
+
