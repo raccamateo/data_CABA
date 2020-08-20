@@ -13,8 +13,40 @@ library(tidyverse)
 
 options(scipen = 999)
 
-#datos sobre los reportes diarios de COVID-19 del Ministerio de Salud
+#datos sobre los reportes diarios de COVID-19 de la Ciudad de Buenos Aires
 reporte_covid <- read.csv('https://cdn.buenosaires.gob.ar/datosabiertos/datasets/salud/reporte-covid/dataset_reporte_covid_sitio_gobierno.csv')
+
+#datos sobre los reportes de COVID-19 del ministerio de salud de la nación.
+reporte_nacion <- read.csv('https://sisa.msal.gov.ar/datos/descargas/covid-19/files/Covid19Casos.csv')
+
+#filtramos solo los casos que corresponden a CABA
+reporte_nacion <- filter(reporte_nacion, residencia_provincia_nombre == "CABA")
+summary(reporte_nacion)
+
+#seleccionamos solo las variables de interés
+reporte_nacion <- select(reporte_nacion, -residencia_pais_nombre, -carga_provincia_nombre,
+                          -sepi_apertura, -carga_provincia_id, -residencia_provincia_id,
+                          - residencia_departamento_id, - ultima_actualizacion)
+
+#creamos un nuevo dataframe que incluye solo a personas cuya edad está indicada en meses (o sea, infantes)
+reporte_nacion_infantes <- filter(reporte_nacion, edad_años_meses == "Meses")
+summary(reporte_nacion_infantes)
+
+#pasamos la fecha a formato fecha
+reporte_nacion_infantes$fecha_apertura <- as.Date(reporte_nacion_infantes$fecha_apertura)
+
+
+#graficamos los casos en el tiempo
+ggplot(reporte_nacion_infantes) +
+  geom_histogram(aes(x = fecha_apertura, fill = origen_financiamiento)) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+ggplot(reporte_nacion_infantes) +
+  geom_histogram(binwidth = 1, aes(x = edad, fill = edad)) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
 
 #vemos el dataset
 head(reporte_covid)
@@ -22,11 +54,9 @@ head(reporte_covid)
 #como FECHA_PROCESO e ID_CARGA no nos interesan, seleccionamos el resto de las variables
 reporte_covid <- select(reporte_covid, -FECHA_PROCESO, - ID_CARGA)
 
-
 #cambiamos el formato de la fecha para poder trabajar como serie temporal
-reporte_covid <- reporte_covid %>% 
+reporte_covid <- reporte_covid %>%
   mutate(FECHA = dmy_hms(FECHA))
-
 
 levels(reporte_covid$SUBTIPO_DATO)
 
@@ -58,7 +88,7 @@ summary(hisopados)
 
 arrange(hisopados, desc(VALOR))
 
-#ahora ploteamos para ver el número de hisopados (acumuldos) en el lapso de tiempo en el que tenemos información
+#ahora ploteamos para ver el número de hisopados (acumulados) en el lapso de tiempo en el que tenemos información
 ggplot(hisopados) +
   geom_line(aes(x = FECHA, y = VALOR)) +
   facet_wrap(~SUBTIPO_DATO, ncol = 5) +
@@ -68,12 +98,6 @@ ggplot(hisopados) +
   theme_minimal()
 
 
-
-
-
-
-
-reporte_covid_camas <- filter(reporte_covid, TIPO_DATO == "total_de_camas_sistema_publico")
 
 #gráfico de líneas animado
 ggplot(reporte_covid_camas, aes(x = FECHA, y = VALOR, color = SUBTIPO_DATO)) +
