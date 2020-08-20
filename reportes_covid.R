@@ -146,3 +146,82 @@ ggplot(camas_publicas_graves, aes(x = FECHA, y = VALOR, color = SUBTIPO_DATO)) +
   theme_minimal() +
   theme(legend.position = "bottom")
 
+
+
+reporte_covid_camas <- filter(reporte_covid, TIPO_DATO == "total_de_camas_sistema_publico")
+
+#gráfico de líneas animado
+ggplot(reporte_covid_camas, aes(x = FECHA, y = VALOR, color = SUBTIPO_DATO)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Camas",
+       subtitle = "Covid-19",
+       x = "",
+       y = "N",
+       caption = "@usernamemateo - fuente: data.buenosaires.gob.ar") +
+  scale_color_viridis(discrete=TRUE) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
+camas_publicas <- filter(reporte_covid, TIPO_DATO == "ocupacion_de_camas_sistema_publico") 
+
+ggplot(camas_publicas, aes(x = FECHA, y = VALOR, color = SUBTIPO_DATO)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Camas publicas",
+       subtitle = "Covid-19",
+       x = "",
+       y = "N") +
+  scale_color_viridis(discrete=TRUE) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+                  
+
+camas_publicas_graves <- filter(reporte_covid, SUBTIPO_DATO == "gaves_arm" |                                                  
+                                  SUBTIPO_DATO == "graves" |                                                     
+                                  SUBTIPO_DATO == "graves_no_arm" |                                              
+                                  SUBTIPO_DATO == "graves_total")  
+
+
+#filtramos datos sobre camas publicas para pacientes graves por el numero ocupacion total
+camas_publicas_graves_total <- camas_publicas_graves %>% filter(SUBTIPO_DATO == "graves_total")
+
+#filtramos datos sobre camas publicas para pacientes graves por el numero disponible
+camas_publicas_graves_disponibles <- camas_publicas_graves %>% filter(SUBTIPO_DATO == "graves")
+
+#creamos otro dataset con el numero de camas graves disponibles y usadas coincidente por fecha
+ocupacion_camas <- inner_join(camas_publicas_graves_disponibles, camas_publicas_graves_total, by = "FECHA")
+
+#
+ocupacion_camas <- ocupacion_camas %>% mutate(porcentaje_ocupacion = (VALOR.y*100)/VALOR.x)
+
+
+
+ggplot(camas_publicas_graves, aes(x = FECHA, y = VALOR, color = SUBTIPO_DATO)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Camas publicas - pacientes graves",
+       subtitle = "CABA - Covid-19",
+       x = "",
+       y = "N",
+       caption = "@usernamemateo - fuente: data.buenosaires.gob.ar") +
+  scale_color_viridis(discrete=TRUE) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
+ggplot(ocupacion_camas, aes(x = FECHA, y = porcentaje_ocupacion)) +
+  geom_line() +
+  geom_point() +
+  ylim(0, 100) +
+  labs(title = "Porcenr¡taje de ocupación de camas para pacientes graves",
+       subtitle = "CABA - Covid-19",
+       x = "",
+       y = "%",
+       caption = "@usernamemateo - fuente: data.buenosaires.gob.ar") +
+  scale_color_viridis(discrete=TRUE) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
