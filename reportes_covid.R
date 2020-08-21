@@ -193,35 +193,147 @@ camas_publicas_graves_disponibles <- camas_publicas_graves %>% filter(SUBTIPO_DA
 #creamos otro dataset con el numero de camas graves disponibles y usadas coincidente por fecha
 ocupacion_camas <- inner_join(camas_publicas_graves_disponibles, camas_publicas_graves_total, by = "FECHA")
 
-#
+
+#calculamos el % de camas para pacientes graves ocupadas en CABA
 ocupacion_camas <- ocupacion_camas %>% mutate(porcentaje_ocupacion = (VALOR.y*100)/VALOR.x)
 
 
 
-ggplot(camas_publicas_graves, aes(x = FECHA, y = VALOR, color = SUBTIPO_DATO)) +
-  geom_line() +
-  geom_point() +
-  labs(title = "Camas publicas - pacientes graves",
-       subtitle = "CABA - Covid-19",
-       x = "",
-       y = "N",
-       caption = "@usernamemateo - fuente: data.buenosaires.gob.ar") +
-  scale_color_viridis(discrete=TRUE) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
+#ahora agregamos los datos de ocupación de camas con arm
+ocupacion_camas <- inner_join(ocupacion_camas, camas_publicas_graves_arm, by = "FECHA")
+
+#calculamos el % de camas para pacientes graves con arm ocupadas en CABA
+ocupacion_camas <- ocupacion_camas %>% mutate(porcentaje_ocupacion_arm = (VALOR*100)/VALOR.x)
 
 
-ggplot(ocupacion_camas, aes(x = FECHA, y = porcentaje_ocupacion)) +
-  geom_line() +
-  geom_point() +
+#ahora agregamos los datos de ocupación de camas sin arm
+ocupacion_camas <- inner_join(ocupacion_camas, camas_publicas_graves_no_arm, by = "FECHA")
+
+#calculamos el % de camas para pacientes graves con arm ocupadas en CABA
+ocupacion_camas <- ocupacion_camas %>% mutate(porcentaje_ocupacion_no_arm = (VALOR.y.y*100)/VALOR.x)
+
+
+#hacemos un plot con el % de ocupación de camas totales, arm y no arm
+ggplot(ocupacion_camas) +
+  geom_line(aes(x = FECHA, y = porcentaje_ocupacion, color = SUBTIPO_DATO.y)) +
+  geom_point(aes(x = FECHA, y = porcentaje_ocupacion, color = SUBTIPO_DATO.y)) +
+  geom_line(aes(x = FECHA, y = porcentaje_ocupacion_arm, color = SUBTIPO_DATO.x.x)) +
+  geom_point(aes(x = FECHA, y = porcentaje_ocupacion_arm, color = SUBTIPO_DATO.x.x)) +
+  geom_line(aes(x = FECHA, y = porcentaje_ocupacion_no_arm, color = SUBTIPO_DATO.y.y)) +
+  geom_point(aes(x = FECHA, y = porcentaje_ocupacion_no_arm, color = SUBTIPO_DATO.y.y)) +
   ylim(0, 100) +
-  labs(title = "Porcenr¡taje de ocupación de camas para pacientes graves",
+  labs(title = "Porcentaje de ocupación: camas para pacientes graves",
        subtitle = "CABA - Covid-19",
        x = "",
        y = "%",
-       caption = "@usernamemateo - fuente: data.buenosaires.gob.ar") +
+       caption = "fuente: data.buenosaires.gob.ar") +
   scale_color_viridis(discrete=TRUE) +
   theme_minimal() +
   theme(legend.position = "bottom")
 
 
+#extraemos los datos de personas hisopadas cada cien mil habitantes en relación a las fechas
+hisopados_100000 <- filter(reporte_covid, SUBTIPO_DATO == "tasa_personas_hisopadas_c_100_000_hab")
+
+ggplot(hisopados_100000, aes(x = FECHA, y = VALOR)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Hisopados cada 100.000 habitantes",
+       subtitle = "CABA - Covid-19",
+       x = "",
+       y = "Hisopados cada 100.000",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
+#calculamos el % de hisopados en relación a las fechas
+hisopados_100000 <- hisopados_100000 %>% mutate(VALOR_PORCENTUAL = (VALOR)/1000)
+
+ggplot(hisopados_100000, aes(x = FECHA, y = VALOR_PORCENTUAL)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Porcentaje de personas hisopadas",
+       subtitle = "CABA - Covid-19",
+       x = "",
+       y = "% hisopados",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
+#vamos a ver la evolución del % de fallecidos en personas mayores de 60 años
+porcentaje_positividad_acumulada <- filter(reporte_covid, SUBTIPO_DATO == "%_positividad_personas_hisopadas_acumulada_caba")
+
+#eje y ajustado
+ggplot(porcentaje_positividad_acumulada, aes(x = FECHA, y = VALOR)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Porcentaje de positividad de personas hisopadas",
+       subtitle = "CABA - Covid-19",
+       x = "",
+       y = "% positividad",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+#eje y escala 0-100
+ggplot(porcentaje_positividad_acumulada, aes(x = FECHA, y = VALOR)) +
+  geom_line() +
+  geom_point() +
+  ylim(0, 100) +
+  labs(title = "Porcentaje de positividad de personas hisopadas",
+       subtitle = "CABA - Covid-19",
+       x = "",
+       y = "% positividad",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
+
+
+#porcentaje de letalidad
+porcentaje_letalidad <- filter(reporte_covid, SUBTIPO_DATO == "%_letalidad_acumulada")
+
+#eje y ajustado
+ggplot(porcentaje_letalidad, aes(x = FECHA, y = VALOR, color = TIPO_DATO)) +
+  geom_point() +
+  labs(title = "Porcentaje de letalidad",
+       subtitle = "CABA - Covid-19",
+       x = "",
+       y = "% letalidad",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
+#porcentaje de positividad por día
+porcentaje_positividad_dia <- filter(reporte_covid, SUBTIPO_DATO =="%_positividad_personas_hisopadas_reportados_del_dia_caba")
+#eje y ajustado
+ggplot(porcentaje_positividad_dia, aes(x = FECHA, y = VALOR)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Porcentaje de positividad de personas hisopadas",
+       subtitle = "CABA - Covid-19",
+       x = "",
+       y = "% positividad",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+
+
+#VER
+#numero de altas acumuladas
+altas_acumuladas <- filter(reporte_covid, SUBTIPO_DATO =="altas_acumuladas")
+altas_acumuladas <- select(altas_acumuladas, -TIPO_REPORTE, -TIPO_DATO)
+#VER
+
+#VER
+#numero de altas por día
+altas_dia <- filter(reporte_covid, SUBTIPO_DATO =="altas_reportados_del_dia")
+altas_dia <- select(altas_dia, -TIPO_REPORTE, -TIPO_DATO)
+
+altas <- inner_join(altas_acumuladas, altas_dia, by = "FECHA")
+#VER
