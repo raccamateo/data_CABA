@@ -129,3 +129,117 @@ movilidad_comunas <- movilidad_comunas %>% rename(
 #definimos la columna date como fecha para poder usar los datos como serie temporal
 movilidad_comunas$date <- as_date( movilidad_comunas$date)
 ```
+
+
+Ahora sí, vamos a los mapas. Los datos de movilidad de Google están determinados por comunas, y acabamos de crear un dataset que a esto le suma la información geo, lo que nos permite llevar todos los datos de movilidad a mapas.
+
+### Movilidad en tiendas y lugares de ocio - CABA:
+```{r}
+#movilidad en tiendas y lugares de ocio
+  tiendas_y_ocio <- ggplot(movilidad_comunas) +
+  geom_sf(data = movilidad_comunas$geometry, aes(fill = movilidad_comunas$retail_and_recreation)) +
+  transition_time(movilidad_comunas$date) +
+    scale_fill_distiller(palette =  "Spectral") +
+  labs(title = "Tendencias en la movilidad en tiendas y lugares de ocio - CABA",
+       subtitle = "Cero es el estandar de normalidad.
+       Fecha: {(frame_time)}",
+       x = "",
+       y = "",
+       fill = "% variación",
+       caption = "fuente: Google - COVID-19 Community Mobility Report") +
+  theme_minimal()
+
+animate(tiendas_y_ocio, fps=1)
+```
+
+### Movilidad en supermercados y farmacias
+```{r}
+supermercados_y_farmacias <- ggplot(movilidad_comunas) +
+  geom_sf(data = movilidad_comunas$geometry, aes(fill = movilidad_comunas$grocery_and_pharmacy)) +
+  transition_time(movilidad_comunas$date) +
+  scale_fill_distiller(palette =  "Spectral") +
+  labs(title = "Tendencias en la movilidad en supermercados
+       y farmacias - CABA",
+       subtitle = "Cero es el estandar de normalidad.
+       Fecha: {(frame_time)}",
+       x = "",
+       y = "",
+       fill = "% variación",
+       caption = "fuente: Google - COVID-19 Community Mobility Report") +
+  theme_minimal()
+
+animate(supermercados_y_farmacias, fps=1)
+```
+
+### Movilidad en parques
+```{r}
+parques <- ggplot(movilidad_comunas) +
+  geom_sf(data = movilidad_comunas$geometry, aes(fill = movilidad_comunas$parks)) +
+  transition_time(movilidad_comunas$date) +
+  scale_fill_distiller(palette =  "Spectral") +
+  labs(title = "Tendencias en la movilidad en parques - CABA",
+       subtitle = "Cero es el estandar de normalidad.
+       Fecha: {(frame_time)}",
+       x = "",
+       y = "",
+       fill = "% variación",
+       caption = "fuente: Google - COVID-19 Community Mobility Report") +
+  theme_minimal()
+
+animate(parques, fps=1)
+```
+
+### Movilidad en estaciones de transporte
+```{r}
+estaciones_transporte <- ggplot(movilidad_comunas) +
+  geom_sf(data = movilidad_comunas$geometry, aes(fill = movilidad_comunas$transit_stations)) +
+  transition_time(movilidad_comunas$date) +
+  scale_fill_distiller(palette =  "Spectral") +
+  labs(title = "Tendencias en la movilidad en estaciones de transporte - CABA",
+       subtitle = "Cero es el estandar de normalidad.
+       Fecha: {(frame_time)}",
+       x = "",
+       y = "",
+       fill = "% variación",
+       caption = "fuente: Google - COVID-19 Community Mobility Report") +
+  theme_minimal()
+
+animate(estaciones_transporte, fps=1)
+```
+
+### Movilidad en lugares de trabajo
+```{r}
+lugares_trabajo <- ggplot(movilidad_comunas) +
+  geom_sf(data = movilidad_comunas$geometry, aes(fill = movilidad_comunas$workplaces)) +
+  transition_time(movilidad_comunas$date) +
+  scale_fill_distiller(palette =  "Spectral") +
+  labs(title = "Tendencias en la movilidad en lugares de trabajo - CABA",
+       subtitle = "Cero es el estandar de normalidad.
+       Fecha: {(frame_time)}",
+       x = "",
+       y = "",
+       fill = "% variación",
+       caption = "fuente: Google - COVID-19 Community Mobility Report") +
+  theme_minimal()
+
+animate(lugares_trabajo, fps=1)
+```
+
+### Movilidad en zonas residenciales
+```{r}
+#movilidad en zonas residenciales
+zonas_residenciales <- ggplot(movilidad_comunas) +
+  geom_sf(data = movilidad_comunas$geometry, aes(fill = movilidad_comunas$residential)) +
+  transition_time(movilidad_comunas$date) +
+  scale_fill_distiller(palette =  "Spectral") +
+  labs(title = "Tendencias en la movilidad en zonas residenciales - CABA",
+       subtitle = "Cero es el estandar de normalidad.
+       Fecha: {(frame_time)}",
+       x = "",
+       y = "",
+       fill = "% variación",
+       caption = "fuente: Google - COVID-19 Community Mobility Report") +
+  theme_minimal()
+
+animate(zonas_residenciales, fps=1)
+```
