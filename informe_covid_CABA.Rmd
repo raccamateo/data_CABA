@@ -1,0 +1,131 @@
+---
+title: "La pandemia en la ciudad, en datos"
+author: "Mateo W. Racca"
+date: "8/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introducción
+
+Este trabajo forma parte de la integración de los módulos Introducción a la Ciencia de Datos y Ciencia de Datos Geográfica, del posgrado en Big Data e Inteligencia Territorial de FLACSO Argentina.
+El objetivo principal del mismo es mostrar distintos aspectos de la situación generada por el COVID-19 en la Ciudad de Buenos Aires, y tiene como base datos abiertos tanto privados como públicos.
+La elección del tema se debe a la relevancia que presenta a nivel local, y a la detección de la necesidad de integrar los datos abiertos de un modo que ayude a entender mejor el impacto de la pandemia en el sistema de salud y en el transporte y la movilidad urbana.
+#Las preguntas que se intentarán responder son:
+- ¿Cómo
+
+# Desarrollo
+Los ejes centrales de este trabajo involucran el flujo de transporte público, la movilidad urbana según estimaciones de Google, los datos del ministerio de salud de la Ciudad en materia de ocupación de camas, números de casos, Unidades Febriles de Emergencia, contactos con el 107 (número de emergencias, ahora ocupado por contactos relacionados al Coronavirus) y el bot de la ciudad, y capturas de tweets geolocalizados en la Ciudad y que abordan temas relacionados a la pandemia y la situación de cuarentena.
+
+## Librerías
+Antes de empezar, los paquetes que se utilizaron durante todo el proceso son:
+
+```{r paquetes, message=FALSE}
+library(tidyverse)
+library(ggmap)
+library(lubridate)
+#gganimate, para animar gráficos que vamos a hacer con ggplot
+library(gganimate)
+library(transformr)
+library(viridis)
+library(hrbrthemes)
+library(sf)
+library(osmdata)
+library(leaflet)
+library(knitr)
+```
+
+También se quitó la notación científica, con esta línea de código:
+```{r, results='hide'}
+options(scipen = 999)
+```
+
+## Ciudad de Buenos Aires
+Según Wikipedia:
+> Buenos Aires, oficialmente Ciudad Autónoma de Buenos Aires (CABA) o Ciudad de Buenos Aires (tal y como figura en su Constitución), es la capital y ciudad más poblada de la República Argentina. Esta metrópolis es una ciudad autónoma que constituye uno de los 24 distritos, o «jurisdicciones de primer orden», que conforman el país. Tiene sus propios poderes ejecutivo, legislativo y judicial. Está situada en la región centro-este del país, sobre la orilla sur del Río de la Plata, en la región pampeana. La Ciudad de Buenos Aires fue cedida por la provincia de Buenos Aires para que fuera la capital federal del país; pero en virtud de la Constitución Nacional es una ciudad autónoma.
+Su tejido urbano se asemeja a un abanico que limita al sur, oeste y norte con la lindante Provincia de Buenos Aires y al este con el Río de la Plata. Oficialmente la ciudad se encuentra dividida en 15 comunas que agrupan a 48 barrios.
+
+Ahora, vamos a localizarla en el mapa:
+
+```{r BA mapa, echo=FALSE}
+bbox_poly <- getbb("Autonomous City of Buenos Aires, Argentina", format_out = "sf_polygon")
+
+leaflet(bbox_poly) %>%
+    addTiles() %>% 
+    addPolygons()
+```
+
+## Movilidad
+En este apartado se toman los datos del [Google COVID-19 Community Mobility Report] (https://www.gstatic.com/covid19/mobility/2020-08-15_AR_Buenos_Aires_Mobility_Report_es-419.pdf). El reporte contiene información sobre la movilidad en la Ciudad por comunas desde el 15 de febrero hasta el 15 de agosto de 2020.
+
+```{r datasets movilidad, message=FALSE}
+#comunas_geo
+comunas <- st_read('https://bitsandbricks.github.io/data/CABA_comunas.geojson')
+
+#movilidad google
+movilidad_google <- read.csv("https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv?cachebust=56adbfa96dfa23c3")
+```
+
+Renombramos la columna comunas
+```{r, results=FALSE}
+comunas <- rename(comunas, comuna = comunas)
+```
+
+Seleccionamos y filtramos (dentro del dataset de Google) los datos correspondientes a Argentina
+```{r, results=FALSE}
+movilidad_google <- movilidad_google %>% filter(country_region_code == "AR")
+```
+
+Manipulamos los datos para que nos resulten más prácticos
+```{r, results=FALSE}
+#vemos qué hay dentro de la variable sub_region_1
+levels(movilidad_google$sub_region_1)
+
+#filtramos solo la data correspondiente a Buenos Aires
+movilidad_google_buenos_aires <- movilidad_google %>% filter(sub_region_1 == "Buenos Aires")
+summary(movilidad_google_buenos_aires)
+
+#dejamos fuera las siguientes columnas
+movilidad_google_buenos_aires <- select(movilidad_google_buenos_aires, -metro_area, -iso_3166_2_code, -census_fips_code)
+
+#como las comunas en nuestro dataset "comunas" aparecen con números y en el dataset de Google con comuna + número, vamos a renombrar.
+comunas$comuna <- (comunas$comuna = case_when(comunas$comuna == 1 ~ "Comuna 1",
+                                              comunas$comuna == 2 ~ "Comuna 2",
+                                              comunas$comuna == 3 ~ "Comuna 3",
+                                              comunas$comuna == 4 ~ "Comuna 4",
+                                              comunas$comuna == 5 ~ "Comuna 5",
+                                              comunas$comuna == 6 ~ "Comuna 6",
+                                              comunas$comuna == 7 ~ "Comuna 7",
+                                              comunas$comuna == 8 ~ "Comuna 8",
+                                              comunas$comuna == 9 ~ "Comuna 9",
+                                              comunas$comuna == 10 ~ "Comuna 10",
+                                              comunas$comuna == 11 ~ "Comuna 11",
+                                              comunas$comuna == 12 ~ "Comuna 12",
+                                              comunas$comuna == 13 ~ "Comuna 13",
+                                              comunas$comuna == 14 ~ "Comuna 14",
+                                              comunas$comuna == 15 ~ "Comuna 15"))
+
+#dejamos fuera columnas que no nos interesan
+comunas <- select(comunas, -barrios, -perimetro, -area)
+
+#renombramos la columna que contiene las comunas para poder crear un nuevo dataset
+movilidad_google_buenos_aires <- movilidad_google_buenos_aires %>% rename(comuna = sub_region_2)
+
+#unimos el dataset con la información de movilidad de google con el de comunas para darle atributos geoespaciales
+movilidad_comunas <- inner_join(movilidad_google_buenos_aires, comunas, by = "comuna")
+
+#vamos a borrar el _percent_change_from_baseline de las columnas
+movilidad_comunas <- movilidad_comunas %>% rename(
+  retail_and_recreation = retail_and_recreation_percent_change_from_baseline,
+  grocery_and_pharmacy = grocery_and_pharmacy_percent_change_from_baseline,
+  parks = parks_percent_change_from_baseline,
+  transit_stations = transit_stations_percent_change_from_baseline,
+  workplaces = workplaces_percent_change_from_baseline,
+  residential = residential_percent_change_from_baseline)
+
+#definimos la columna date como fecha para poder usar los datos como serie temporal
+movilidad_comunas$date <- as_date( movilidad_comunas$date)
+```
