@@ -107,7 +107,7 @@ ggplot(reporte_covid_camas, aes(x = FECHA, y = VALOR, color = SUBTIPO_DATO)) +
        subtitle = "Covid-19",
        x = "",
        y = "N",
-       caption = "@usernamemateo - fuente: data.buenosaires.gob.ar") +
+       caption = "fuente: data.buenosaires.gob.ar") +
   scale_color_viridis(discrete=TRUE) +
   theme_minimal() +
   theme(legend.position = "bottom")
@@ -141,7 +141,7 @@ ggplot(camas_publicas_graves, aes(x = FECHA, y = VALOR, color = SUBTIPO_DATO)) +
        subtitle = "CABA - Covid-19",
        x = "",
        y = "N",
-       caption = "@usernamemateo - fuente: data.buenosaires.gob.ar") +
+       caption = "fuente: data.buenosaires.gob.ar") +
   scale_color_viridis(discrete=TRUE) +
   theme_minimal() +
   theme(legend.position = "bottom")
@@ -158,7 +158,7 @@ ggplot(reporte_covid_camas, aes(x = FECHA, y = VALOR, color = SUBTIPO_DATO)) +
        subtitle = "Covid-19",
        x = "",
        y = "N",
-       caption = "@usernamemateo - fuente: data.buenosaires.gob.ar") +
+       caption = "fuente: data.buenosaires.gob.ar") +
   scale_color_viridis(discrete=TRUE) +
   theme_minimal() +
   theme(legend.position = "bottom")
@@ -172,7 +172,8 @@ ggplot(camas_publicas, aes(x = FECHA, y = VALOR, color = SUBTIPO_DATO)) +
   labs(title = "Camas publicas",
        subtitle = "Covid-19",
        x = "",
-       y = "N") +
+       y = "N",
+       caption = "fuente: data.buenosaires.gob.ar") +
   scale_color_viridis(discrete=TRUE) +
   theme_minimal() +
   theme(legend.position = "bottom")
