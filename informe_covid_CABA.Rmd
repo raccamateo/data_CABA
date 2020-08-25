@@ -243,3 +243,105 @@ zonas_residenciales <- ggplot(movilidad_comunas) +
 
 animate(zonas_residenciales, fps=1)
 ```
+
+
+## COVID-19 en la Ciudad de Buenos Aires: infraestructura, movilidad, operativos y casos
+En este apartado, se toman los datos sobre casos de Coronavirus en la Ciudad. El objetivo es mostrar la evolución de casos por distritos (desde el gobierno de la ciudad usan una división distinta a la habitual, por barrios o comunas) que tienen estrecha relación con el operativo DetectAR, cuyos centros se encuentran en distintos puntos de la ciudad.
+
+### Operativo DetectAR
+Para conocer la distribución de los operativos en la ciudad, vamos a tomar los siguientes datos:
+
+```{r, results=FALSE}
+#datos sobre la ubicación de los operativos detectar en la ciudad
+detectar <- st_read('https://cdn.buenosaires.gob.ar/datosabiertos/datasets/salud/operativo-detectar/operativo-detectar.geojson')
+#comunas_geo
+comunas <- st_read('https://bitsandbricks.github.io/data/CABA_comunas.geojson')
+```
+
+Llevado a un mapa, la representación es la siguiente:
+```{r, warning = FALSE}
+#extraemos de geometry las coordenadas en x e y (llamadas lat y long)
+detectar <- detectar %>% mutate(lat = unlist(map(detectar$geometry, 1)),long=unlist(map(detectar$geometry,2)))
+
+ggplot() +
+  geom_sf(data = comunas$geometry) +
+  geom_point(data = detectar, aes(x = lat, y = long, color = comuna)) +
+  geom_sf_text(data=comunas, aes(label = comunas), size=2.5, colour = "black") +
+  labs(title = "Mapa de puntos DetectAR",
+       subtitle = "Ciudad Autónoma de Buenos Aires",
+       x = "",
+       y = "",
+       caption = "fuente: data.buenosaires.gob.ar",
+       color = "Se encuentra en:") +
+  theme_minimal()
+```
+
+Como se ve en el mapa, hay cuatro puntos DetectAR en la comuna 4, tres en las comunas 7 y 8, dos en las comunas 1, 2 y 3 y uno en las comunas 2, 5, 6, 9 y 14.
+
+### SUBE
+A través de la API de transporte del Gobierno de la Ciudad, se puede acceder a los datos de uso de la tarjeta SUBE.
+```{r}
+#datos sobre la SUBE
+sube <- read.csv('https://cdn.buenosaires.gob.ar/datosabiertos/datasets/transporte/sube/dataset_viajes_sube.csv')
+
+#vamos a ver qué datos hay en el dataset sobre la sube
+head(sube)
+
+#los datos que tenemos son: tipo de transporte, el día, la variable parcial y la cantidad de pasajerxs
+str(sube)
+
+#transformamos el formato de las fechas a día-mes-año-horas:minutos:segundos
+sube <- sube %>% mutate(DIA = dmy_hms(DIA))
+
+#ahora vamos a cambiar los nombres para que la variable DIA (que contiene las fechas) se llame FECHA
+sube$FECHA <- sube$DIA
+
+#tomamos las fechas y las transformamos en una nueva variable. vamos a llamarla DIA, y vamos a asignarle un número según qué día de la semana es cada una de esas fechas
+sube$DIA <- wday(sube$FECHA)
+
+#vamos a asignar a crear una columna llamada SEMANA, que va a tener la información de a qué semana corresponde cada día
+sube$SEMANA <- week(sube$FECHA)
+
+#ahora transformamos los números en días, para eso:
+sube$DIA <- (sube$DIA = case_when(sube$DIA == 2 ~ "LUNES",
+                       sube$DIA == 3 ~ "MARTES",
+                       sube$DIA == 4 ~ "MIÉRCOLES",
+                       sube$DIA == 5 ~ "JUEVES",
+                       sube$DIA == 6 ~ "VIERNES",
+                       sube$DIA == 7 ~ "SÁBADO",
+                       sube$DIA == 1 ~ "DOMINGO"))
+
+#extraemos el número del mes al que corresponde cada fecha
+sube$N_MES <- month(sube$FECHA)
+
+#asignamos a cada número de mes el mes correspondiente
+sube$N_MES <- (sube$N_MES = case_when(sube$N_MES == 3 ~ "MARZO",
+                                      sube$N_MES == 4 ~ "ABRIL",
+                                      sube$N_MES == 5 ~ "MAYO",
+                                      sube$N_MES == 6 ~ "JUNIO",
+                                      sube$N_MES == 7 ~ "JULIO",
+                                      sube$N_MES == 8 ~ "AGOSTO",
+                                      sube$N_MES == 9 ~ "SEPTIEMBRE",
+                                      sube$N_MES == 10 ~ "OCTUBRE",
+                                      sube$N_MES == 11 ~ "NOVIEMBRE",
+                                      sube$N_MES == 12 ~ "DICIEMBRE"))
+
+#extraemos a qué día del mes corresponde cada fecha
+sube$N_DIA <- day(sube$FECHA)
+
+#vamos a ver cómo quedo lo que hicimos
+head(sube, n=10)
+
+#como no vamos a usar la fila PARCIAL, vamos a dejarla fuera del dataset
+sube <- select(sube, -PARCIAL)
+head(sube, n=10)
+
+
+#ahora vamos a filtrar por tipo de transporte y a crear datasets cada
+sube_subte <- filter(sube, TIPO_TRANSPORTE == "Subte")
+head(sube_subte, n=10)
+sube_colectivo <- filter(sube, TIPO_TRANSPORTE == "Colectivo")
+head(sube_colectivo, n=10)
+sube_tren <- filter(sube, TIPO_TRANSPORTE == "Tren")
+head(sube_tren, n=10)
+```
