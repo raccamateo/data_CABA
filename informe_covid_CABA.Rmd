@@ -289,7 +289,8 @@ head(sube)
 
 #los datos que tenemos son: tipo de transporte, el día, la variable parcial y la cantidad de pasajerxs
 str(sube)
-
+```
+```{r, results=FALSE}
 #transformamos el formato de las fechas a día-mes-año-horas:minutos:segundos
 sube <- sube %>% mutate(DIA = dmy_hms(DIA))
 
@@ -328,20 +329,89 @@ sube$N_MES <- (sube$N_MES = case_when(sube$N_MES == 3 ~ "MARZO",
 
 #extraemos a qué día del mes corresponde cada fecha
 sube$N_DIA <- day(sube$FECHA)
+```
 
-#vamos a ver cómo quedo lo que hicimos
-head(sube, n=10)
+Como no vamos a usar la fila PARCIAL, vamos a dejarla fuera del dataset
 
-#como no vamos a usar la fila PARCIAL, vamos a dejarla fuera del dataset
+```{r}
 sube <- select(sube, -PARCIAL)
 head(sube, n=10)
+```
 
+Vamos a graficar el uso del transporte público por día (y su evolución por semana) en CABA.
 
-#ahora vamos a filtrar por tipo de transporte y a crear datasets cada
-sube_subte <- filter(sube, TIPO_TRANSPORTE == "Subte")
-head(sube_subte, n=10)
-sube_colectivo <- filter(sube, TIPO_TRANSPORTE == "Colectivo")
-head(sube_colectivo, n=10)
-sube_tren <- filter(sube, TIPO_TRANSPORTE == "Tren")
-head(sube_tren, n=10)
+```{r}
+ggplot(data = sube, aes(x = factor(DIA, levels=c("LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO", "DOMINGO")), y = CANTIDAD)) +
+  geom_bar(stat='identity', aes(fill = TIPO_TRANSPORTE)) +
+  transition_time(SEMANA) +
+  labs(title = "Uso de transporte público durante la pandemia
+       semana: {as.integer(frame_time)}",
+       subtitle = "Ciudad Autónoma de Buenos Aires",
+       x = "Día",
+       y = "Usuarixs",
+       caption = "fuente: data.buenosaires.gob.ar",
+       color = "Transporte:") +
+  scale_fill_viridis_d() +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+Tal como se puede observar en el gráfico, la semanas 9 y 10 el uso de la tarjeta alcanza valores superiores a los seis millones por día, mientras que automáticamente después (es decir cuando se declara la cuarentena), esos niveles caen debajo del millón y no vuelven a superar los dos millones.
+
+Si lo vemos en un gráfico estático, por día, queda así:
+```{r}
+ggplot(sube, aes(x = FECHA, y = CANTIDAD, color = TIPO_TRANSPORTE)) +
+  geom_line() +
+  geom_point() +
+    labs(title = "Uso de transporte público durante la pandemia",
+         subtitle = "Ciudad Autónoma de Buenos Aires",
+         x = "",
+         y = "Usuarixs",
+         caption = "fuente: data.buenosaires.gob.ar",
+         color = "Transporte:") +
+  scale_color_viridis(discrete=TRUE) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+Tal como se puede observar, el número de usuarixs del transporte público en la ciudad cae cuando se declara la cuarentena, y se mantiene casi constante con el avance del tiempo. Los puntos mínimos se corresponden a los fines de semana y/o días feriados.
+
+Vamos a quedarnos con las fechas desde el comienzo de la cuarentena para poder visualizar mejor cómo se dio el cambio desde el 20 de marzo (fecha en la que comenzó la cuarentena) hasta hoy.
+Para eso:
+
+```{r, results=FALSE}
+sube$FECHA <- as_date(sube$FECHA)
+sube_cuarentena <- sube %>% filter(FECHA > "2020-03-20")
+```
+
+Si lo vemos en un gráfico de barras, por día, queda así:
+```{r}
+ggplot(sube_cuarentena, aes(x = FECHA, y = CANTIDAD, fill = TIPO_TRANSPORTE)) +
+  geom_col() +
+    labs(title = "Uso de transporte público durante la pandemia",
+         subtitle = "Ciudad Autónoma de Buenos Aires",
+         x = "",
+         y = "Usuarixs",
+         caption = "fuente: data.buenosaires.gob.ar",
+         color = "Transporte:") +
+  scale_color_viridis(discrete=TRUE) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+Como se puede observar, en este gráfico se nota de manera más clara la variación en el uso de la sube desde que empezó la cuarentena. Desde mi punto de vista, hay dos fase: la primera va desde fines de marzo hasta fines de junio, en la cual tanto al inicio como al final se encuentran valores mínimos en relación con el resto del periodo. Por otro lado, luego de la fase de descenso en el uso de la SUBE que se da entre mediados de junio y los primeros días de julio, comienza un incremento gradual (que hasta el momento parece sostenido).
+
+### Flujo Vehicular
+Los datos relacionados con el flujo vehicular brindan información sobre ingresos, egresos y circulación interna en la ciudad. Al momento de analizar los datos, encontré valores que llamaron mi atención y decidí consultar a gente del gobierno de la ciudad para entender si se trataba de un error o si esos valores eran en realidad normales. Me confirmaron que hubo irregularidades en los sensores durante el mes de marzo. En consecuencia, los datos sobre el flujo vehicular no van a ser considerados.
+
+## Reportes de casos de COVID-19
+En este apartado vamos a trabajar con los reportes diarios de casos de COVID-19 del inisterio de Salud de la Ciudad de Buenos Aires.
+```{r, results=FALSE}
+#descargamos los datos sobre los reportes diarios de COVID-19 de la Ciudad de Buenos Aires
+reporte_covid <- read.csv('https://cdn.buenosaires.gob.ar/datosabiertos/datasets/salud/reporte-covid/dataset_reporte_covid_sitio_gobierno.csv')
+```
+
+```{r}
+#vemos el dataset
+head(reporte_covid)
 ```
