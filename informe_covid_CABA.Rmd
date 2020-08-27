@@ -477,3 +477,13 @@ ggplot(hisopados) +
        caption = "fuente: data.buenosaires.gob.ar") +
   theme_minimal()
 ```
+
+
+### Camas 
+En esta sección vamos a ver la información relacionada con las camas del sistema de salud en la ciudad. 
+Filtramos:
+```{r}
+reporte_covid_camas <- filter(reporte_covid, TIPO_DATO == "total_de_camas_sistema_publico")
+
+camas_publicas <- filter(reporte_covid, TIPO_DATO == "ocupacion_de_camas_sistema_publico")
+```
