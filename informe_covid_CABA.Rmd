@@ -559,3 +559,26 @@ ocupacion_camas <- inner_join(ocupacion_camas, camas_publicas_graves_no_arm, by 
 #calculamos el % de camas para pacientes graves con arm ocupadas en CABA
 ocupacion_camas <- ocupacion_camas %>% mutate(porcentaje_ocupacion_no_arm = (VALOR.y.y*100)/VALOR.x)
 ```
+
+Acá podemos observar el % de ocupación de camas totales, arm y no arm en la ciudad.
+```{r}
+ggplot(ocupacion_camas) +
+  geom_line(aes(x = FECHA, y = porcentaje_ocupacion, color = SUBTIPO_DATO.y)) +
+  geom_point(aes(x = FECHA, y = porcentaje_ocupacion, color = SUBTIPO_DATO.y)) +
+  geom_line(aes(x = FECHA, y = porcentaje_ocupacion_arm, color = SUBTIPO_DATO.x.x)) +
+  geom_point(aes(x = FECHA, y = porcentaje_ocupacion_arm, color = SUBTIPO_DATO.x.x)) +
+  geom_line(aes(x = FECHA, y = porcentaje_ocupacion_no_arm, color = SUBTIPO_DATO.y.y)) +
+  geom_point(aes(x = FECHA, y = porcentaje_ocupacion_no_arm, color = SUBTIPO_DATO.y.y)) +
+  ylim(0, 100) +
+  labs(title = "Porcentaje de ocupación: camas para pacientes graves",
+       subtitle = "CABA - Covid-19",
+       x = "",
+       y = "%",
+       color = "Camas:",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  scale_color_viridis(discrete=TRUE) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+Dentro del dataset de reportes sobre Coronavirus encontramos también la cantidad (acumulada) de personas hisopadas cada cien mil habitantes a lo largo del tiempo. Vamos a crear un nuevo dataset filtrando estos datos
