@@ -599,3 +599,21 @@ ggplot(hisopados_100000, aes(x = FECHA, y = VALOR)) +
   theme_minimal() +
   theme(legend.position = "bottom")
 ```
+
+Como la cantidad de hisopados aparece cada cien mil habitantes, vamos a calcular el número de personas hisopadas cada cien. Esto permitirá ver el avances del porcentaje de hisopados.
+```{r, results=FALSE}
+hisopados_porcentaje <- hisopados_100000 %>% mutate(VALOR_PORCENTUAL = (VALOR)/1000)
+```
+Y lo llevamos a un gráfico:
+```{r}
+ggplot(hisopados_porcentaje, aes(x = FECHA, y = VALOR_PORCENTUAL)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Porcentaje de personas hisopadas",
+       subtitle = "CABA - Covid-19",
+       x = "",
+       y = "%",
+       caption = "fuente: data.buenosaires.gob.ar") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
