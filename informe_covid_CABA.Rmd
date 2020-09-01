@@ -494,6 +494,15 @@ ggplot(hisopados_porcentaje, aes(x = FECHA, y = VALOR_PORCENTUAL)) +
   theme_minimal() +
   theme(legend.position = "bottom")
 ```
+### Test Rápidos y PCR
+Para explicar la diferencia entre los test rápidos y PCR se consultó el sitio [Gaceta Médica] (https://gacetamedica.com/investigacion/como-funcionan-y-en-que-se-diferencian-las-pcr-y-los-test-rapidos-de-coronavirus/).
+
+*Las PCR (siglas en inglés de “Reacción en Cadena de la Polimersa”), son un tipo de pruebas de diagnóstico que se llevan utilizando durante años en diferentes crisis de salud pública relacionadas con enfermedades infecciosas. Los test rápidos se han incorporado recientemente y, como su nombre indica, son más rápidos y sencillos. Ambos sirven para comprobar si una persona está infectada o no por el Covid-19.
+Al realizar una prueba de diagnóstico mediante PCR, lo que permite detectar es un fragmento del material genético de un patógeno o microorganismo. La PCR, se basa en las características de estabilidad al calor de una enzima polimerasa. Tras el análisis en un laboratorio de Microbiología de una muestra respiratoria de una persona sospechosa de estar infectada, si la prueba detecta ARN del virus, el resultado es positivo. Así, se sabría que ese paciente tiene Covid-19. En cambio, si la técnica de PCR no detecta el material genético del virus, la persona no estaría infectada.
+A diferencia de la PCR, los test rápidos no identifican el ARN del virus, sino que usan dos métodos distintos:
+- A través de una muestra de sangre, son capaces de detectar anticuerpos producidos frente al virus.
+- A través de muestras respiratorias de exudado nasofaríngeo, pueden detectar proteínas del virus.
+Estos test se basan en una inmunocromatografía en papel, es decir, una plataforma que tiene “pegadas” las proteínas del virus para detectar anticuerpos o anticuerpos específicos para descubrir las proteínas del virus.*
 
 ### Positividad de testeos
 ------------------------------------------
