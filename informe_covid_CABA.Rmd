@@ -504,6 +504,37 @@ A diferencia de la PCR, los test rápidos no identifican el ARN del virus, sino 
 - A través de muestras respiratorias de exudado nasofaríngeo, pueden detectar proteínas del virus.
 Estos test se basan en una inmunocromatografía en papel, es decir, una plataforma que tiene “pegadas” las proteínas del virus para detectar anticuerpos o anticuerpos específicos para descubrir las proteínas del virus.*
 
+
+Ahora vamos a seleccionar los datos correspondientes a información relacionada con los test rápidos y con PCR.
+```{r, results=FALSE}
+test_rapidos_positivos_dia <- filter(
+  reporte_covid, SUBTIPO_DATO == "tr_realizados_positivos_reportados_del_dia")
+  
+test_rapidos_positivos_dia$TIPO_DATO <- (test_rapidos_positivos_dia$TIPO_DATO = case_when(
+  test_rapidos_positivos_dia$TIPO_DATO == "tr_en_centros_de_salud_hospitales_cesacs_cemar_e_irep" ~ "salud",
+  test_rapidos_positivos_dia$TIPO_DATO == "tr_en_fuerzas_de_seguridad_insituto_de_cadetes_transporte_y_carga_manual_policia" ~ "fuerzas_de_seguridad",
+  test_rapidos_positivos_dia$TIPO_DATO == "tr_en_geriatricos" ~ "geriatricos"))
+
+pcr <- filter(
+  reporte_covid, SUBTIPO_DATO == "pcr_realizados_positivos" | SUBTIPO_DATO == "pcr_realizados_positivos_reportados_del_dia")
+```
+
+```{r}
+summary(test_rapidos_positivos_dia)
+
+ggplot(test_rapidos_positivos_dia, aes(x = FECHA, y = VALOR, fill = TIPO_DATO)) +
+  geom_col() +
+  labs(title = "Test Rápidos positivos por día",
+       subtitle = "CABA - Covid-19",
+       x = "",
+       y = "",
+       caption = "fuente: data.buenosaires.gob.ar",
+       fill = "Test en:") +
+  scale_fill_viridis_d() +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
 ### Positividad de testeos
 ------------------------------------------
 
