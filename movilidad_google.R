@@ -19,7 +19,7 @@ comunas <- st_read('https://bitsandbricks.github.io/data/CABA_comunas.geojson')
 comunas <- rename(comunas, comuna = comunas)
 
 #movilidad google
-movilidad_google <- read.csv("https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv?cachebust=56adbfa96dfa23c3")
+movilidad_google <- read_csv('https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv?cachebust=56adbfa96dfa23c3')
 movilidad_google <- movilidad_google %>% filter(country_region_code == "AR")
 
 #vemos qué hay dentro de la variable sub_region_1
